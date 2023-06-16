@@ -1,6 +1,6 @@
 from pathlib import Path
 class Params:
-    name = 'automask_2'
+    name = 'automask_2_cont'
     epochs = 10
     batch_size = 2
     lr = 0.0005
@@ -16,8 +16,8 @@ class Params:
     seed = 201
     loss_print_interval = 100
     pred_save_dir = Path(f'/home/markin/Markin/prj/innopolis/data/all_predictions/{name}')
-    ckpt_load_path = None  # Path('/home/markin/Markin/prj/innopolis/data/all_ckpts/more_augs/weights_600.pth')
-    comment = 'generated new auto masks for stage 1'
+    ckpt_load_path = Path('/home/markin/Markin/prj/innopolis/data/all_ckpts/automask_2/weights_1000.pth')
+    comment = 'generated new auto masks for stage 1, cont from iter 1000 for ensemble'
     log_dir = Path(f'/home/markin/Markin/prj/innopolis/data/plots/{name}')
 
 
