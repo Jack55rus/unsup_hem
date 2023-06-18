@@ -44,7 +44,7 @@ if __name__ == '__main__':
                                loss_sup=segm_loss, loss_unsup=ce_loss, device=Params.device,
                                print_interval=Params.loss_print_interval, img_save_dir=Params.pred_save_dir,
                                weights_save_dir=Params.ckpt_save_path, train_params=train_params,
-                               log_dir=Params.log_dir)
+                               log_dir=Params.log_dir, save_interval=Params.ckpt_save_interval)
         lr_scheduler.step(loss_dict['total_loss'], epoch=epoch)
         print(f'Segm loss: {loss_dict["segm_loss"]}, SSL loss: {loss_dict["ssl_loss"]}, '
               f'total: {loss_dict["total_loss"]}')

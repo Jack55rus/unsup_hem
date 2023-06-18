@@ -36,6 +36,7 @@ class SSLDataset(Dataset):
         space_variant_transform = self.transforms.space_variant(image=sup_image, mask=mask)
         sup_image, mask = space_variant_transform['image'], space_variant_transform['mask']
         unsup_image_2 = self.transforms.space_invariant(image=unsup_image_1)['image']
+        # unsup_image_2 = self.transforms.space_variant(image=unsup_image_2)['image']
         return sup_image, mask, unsup_image_1, unsup_image_2
 
 
@@ -103,7 +104,8 @@ class Augs:
         ])
 
 def train_iter(model: nn.Module, train_loader: DataLoader, optimizer, loss_sup, loss_unsup, device: str,
-               print_interval: int, img_save_dir: Path, weights_save_dir: Path, train_params, log_dir: Path):
+               print_interval: int, img_save_dir: Path, weights_save_dir: Path, train_params, log_dir: Path,
+               save_interval: int):
     model.train()
     loss_dict = {'segm_loss': [], 'ssl_loss': [], 'total_loss': []}
     log_dict = {'segm_loss': [], 'ssl_loss': []}
@@ -122,8 +124,6 @@ def train_iter(model: nn.Module, train_loader: DataLoader, optimizer, loss_sup, 
         optimizer.step()
         if it % print_interval == 0 and it != 0:
             inference(model=model, x=unsup_image_1, save_path=img_save_dir, iteration=it)
-            save_weights(model=model, train_params=train_params, segm_loss=segm_loss.item(), ce_loss=ssl_loss.item(),
-                         save_dir=weights_save_dir, it=it, optimizer=optimizer)
             iters.append(it)
             log_dict['segm_loss'].append(np.mean(loss_dict['segm_loss'][-print_interval:]))
             log_dict['ssl_loss'].append(np.mean(loss_dict['ssl_loss'][-print_interval:]))
@@ -132,6 +132,9 @@ def train_iter(model: nn.Module, train_loader: DataLoader, optimizer, loss_sup, 
             plt.plot(iters, log_dict['segm_loss'], label='segm loss')
             plt.plot(iters, log_dict['ssl_loss'], label='ssl_loss')
             plt.savefig(log_dir / 'loss.jpg')
+        if it % save_interval == 0 and it != 0:
+            save_weights(model=model, train_params=train_params, segm_loss=segm_loss.item(), ce_loss=ssl_loss.item(),
+                         save_dir=weights_save_dir, it=it, optimizer=optimizer)
 
     loss_dict['segm_loss'] = sum(loss_dict['segm_loss']) / len(loss_dict['segm_loss'])
     loss_dict['ssl_loss'] = sum(loss_dict['ssl_loss']) / len(loss_dict['ssl_loss'])

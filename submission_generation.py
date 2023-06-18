@@ -96,6 +96,7 @@ if __name__ == '__main__':
             else:
                 y = model(image, None, None)
                 y = ((torch.sigmoid(y) > Params.threshold) * 255).type(torch.uint8)
+                # y = (torch.sigmoid(y) * 255).type(torch.uint8)
             y = y[0, 0, ...]
             y = np.array(y.cpu())
             plt.imsave(pred_save_dir / f'{fname.name}', y, cmap='gray')
@@ -107,4 +108,4 @@ if __name__ == '__main__':
             plt.imsave(vis_dir / f'{fname.name}', xy, cmap='gray')
     Params.csv_path.mkdir(exist_ok=True, parents=True)
     save_path = Params.csv_path / f'{Params.csv_name}_{save_time}.csv'
-    generate_csv(submission_pred_dir=pred_save_dir, save_path=save_path)
+    # generate_csv(submission_pred_dir=pred_save_dir, save_path=save_path)
