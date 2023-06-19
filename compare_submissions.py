@@ -14,13 +14,6 @@ class ArgumentParser(Tap):
     bin_pred_dir_3: Optional[Path] = None
     output_dir: Path
 
-    # def configure(self) -> None:
-    #     self.add_argument("-in", "--input_img_dir")
-    #     self.add_argument("-out", "--output_dir")
-    #     self.add_argument("-p1", "--bin_pred_dir_1")
-    #     self.add_argument("-p2", "--bin_pred_dir_2")
-    #     self.add_argument("-p3", "--bin_pred_dir_3")
-
 
 def colorize_bin_image(bin_img: np.ndarray, channel: int) -> np.ndarray:
     bin_img_col = np.where(bin_img > 250, 255, 0)  # remove compression artifacts
