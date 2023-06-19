@@ -239,27 +239,27 @@ class UNet(nn.Module):
     def __init__(self, out_classes=2, unsup_dim: int = 32, up_sample_mode='conv_transpose'):
         super(UNet, self).__init__()
         self.up_sample_mode = up_sample_mode
-        # Downsampling Path
-        self.down_conv1 = DownBlock(1, 32)
-        self.down_conv2 = DownBlock(32, 64)
-        self.down_conv3 = DownBlock(64, 128)
-        self.down_conv4 = DownBlock(128, 256)
+        # Downsampling Pat
+        self.down_conv1 = DownBlock(1, 32) # 1, 32
+        self.down_conv2 = DownBlock(32, 64)  # 32, 64
+        self.down_conv3 = DownBlock(64, 128)  # 64, 128
+        self.down_conv4 = DownBlock(128, 256)  # 128, 256
         # Bottleneck
-        self.double_conv = DoubleConv(256, 512)
+        self.double_conv = DoubleConv(256, 512)  # 256, 512
         # Upsampling Path
-        self.up_conv4 = UpBlock(256 + 512, 256, self.up_sample_mode)
-        self.up_conv3 = UpBlock(128 + 256, 128, self.up_sample_mode)
-        self.up_conv2 = UpBlock(64 + 128, 64, self.up_sample_mode)
-        self.up_conv1 = UpBlock(64 + 32, 32, self.up_sample_mode)
+        self.up_conv4 = UpBlock(256 + 512, 256, self.up_sample_mode)  # 256 + 512, 256
+        self.up_conv3 = UpBlock(128 + 256, 128, self.up_sample_mode)  # 128 + 256, 128
+        self.up_conv2 = UpBlock(64 + 128, 64, self.up_sample_mode)  # 64 + 128, 64
+        self.up_conv1 = UpBlock(64 + 32, 32, self.up_sample_mode)  # 64 + 32, 32
         # Final Convolution
-        self.conv_last = nn.Conv2d(32, out_classes, kernel_size=1)
+        self.conv_last = nn.Conv2d(32, out_classes, kernel_size=1)  # 32
         ## unsup branch
         self.gap = nn.MaxPool2d(kernel_size=32)
         self.ssl_feats = nn.Sequential(
-                    nn.Linear(in_features=512, out_features=256),
+                    nn.Linear(in_features=512, out_features=256),  # 512, 256
                     nn.ReLU(inplace=True),
                     nn.Dropout(p=0.5),
-                    nn.Linear(in_features=256, out_features=unsup_dim)
+                    nn.Linear(in_features=256, out_features=unsup_dim) # 256, unsup_dim
                 )
 
     def forward_sup(self, x):

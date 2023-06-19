@@ -12,6 +12,8 @@ import pandas as pd
 from datetime import datetime
 from datetime import date
 from skimage import measure
+from scipy.ndimage.morphology import binary_erosion
+
 
 def generate_csv(submission_pred_dir: Path, save_path: Path):
     submission_dict = {'ID': [], 'Value': []}
@@ -20,7 +22,7 @@ def generate_csv(submission_pred_dir: Path, save_path: Path):
         if '026725' in fname.stem:
             continue
         image = cv2.imread(str(fname), 0)  # 512x512
-        image = np.where(image > 250, 1, 0)  # make sure it's binary
+        image = np.where(image > 245, 1, 0)  # make sure it's binary
         for x in range(image.shape[1]):
             for y in range(image.shape[0]):
                 submission_dict['ID'].append(f'{fname.stem}_{x}_{y}')
@@ -28,15 +30,34 @@ def generate_csv(submission_pred_dir: Path, save_path: Path):
     df = pd.DataFrame(submission_dict)
     df.to_csv(save_path, index=False)
 
-def ensemble_pred(image, model_1, model_2, model_3):
+def ensemble_pred(image, model_1, model_2, model_3, method='majority'):
     y_1 = model_1(image, None, None)
     y_2 = model_2(image, None, None)
     y_3 = model_3(image, None, None)
-    y_1 = (torch.sigmoid(y_1) > Params.threshold).type(torch.uint8)
-    y_2 = (torch.sigmoid(y_2) > Params.threshold).type(torch.uint8)
-    y_3 = (torch.sigmoid(y_3) > Params.threshold).type(torch.uint8)
-    y = y_1 + y_2 + y_3
-    y = (y >= 2).type(torch.uint8)
+    y_1 = torch.sigmoid(y_1)
+    y_2 = torch.sigmoid(y_2)
+    y_3 = torch.sigmoid(y_3)
+    if method == 'majority':
+        y_1 = (y_1 > Params.threshold).type(torch.uint8)
+        y_2 = (y_2 > Params.threshold_add_1).type(torch.uint8)
+        y_3 = (y_3 > Params.threshold_add_2).type(torch.uint8)
+        y = y_1 + y_2 + y_3
+        y = (y >= 2).type(torch.uint8)
+    elif method == 'and':
+        y_1 = (y_1 > Params.threshold).type(torch.uint8)
+        y_2 = (y_2 > Params.threshold_add_1).type(torch.uint8)
+        y_3 = (y_3 > Params.threshold_add_2).type(torch.uint8)
+        y = (y_1 * y_2 * y_3).type(torch.uint8)
+    elif method == 'average':
+        y = y_1 + y_2 + y_3
+        y = y / 3
+        y = (y > Params.threshold).type(torch.uint8)
+    elif method == 'or':
+        y_1 = (y_1 > Params.threshold).type(torch.uint8)
+        y_2 = (y_2 > Params.threshold_add_1).type(torch.uint8)
+        y_3 = (y_3 > Params.threshold_add_2).type(torch.uint8)
+        y = y_1 + y_2 + y_3
+        y = (y > 0).type(torch.uint8)
     y = filter_pred_by_area(y)  # remove small objects
     y = y * 255
     return y
@@ -55,6 +76,29 @@ def filter_pred_by_area(pred: torch.Tensor) -> torch.Tensor:
     mask[np.isin(mask, object_ids_to_remove)] = 0
     mask[mask != 0] = 1
     return torch.from_numpy(mask).unsqueeze(0).unsqueeze(1)
+
+def filter_pred_by_area_np(pred: torch.Tensor) -> torch.Tensor:
+    if np.sum(pred) == 0:
+        return pred
+    pred[pred > 0] = 1
+    mask = measure.label(pred)
+    objects = measure.regionprops(mask)
+    object_ids_to_remove = []
+    for obj in objects:
+        if obj.area < Params.smallest_size:
+            object_ids_to_remove.append(obj.label)
+    mask[np.isin(mask, object_ids_to_remove)] = 0
+    mask[mask != 0] = 255
+    return mask
+
+def remove_extra_areas(image: np.ndarray):
+    _, binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY)
+    binary = binary_erosion(binary, structure=np.ones(shape=(Params.erosion_window, Params.erosion_window))).astype(np.uint8)
+    contours, hierarchy = cv2.findContours(binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    mask = np.zeros_like(image)
+    cv2.drawContours(mask, contours, 0, 255, cv2.FILLED)
+    return mask / 255
 
 if __name__ == '__main__':
     current_time = datetime.now().strftime("%H_%M_%S")
@@ -83,22 +127,29 @@ if __name__ == '__main__':
 
     img_paths = list(Params.submission_img_dir.glob('*.jpg'))
     if Params.num_files_to_infer != -1:
-        img_paths = np.random.choice(img_paths, size=Params.num_files_to_infer, replace=False)
+        img_paths = sorted(list(Params.submission_img_dir.glob('*.jpg')))[:Params.num_files_to_infer]
+        # img_paths = np.random.choice(img_paths, size=Params.num_files_to_infer, replace=False)
+
+    submission_dict = {'ID': [], 'Value': []}
 
     with torch.no_grad():
         for fname in tqdm(img_paths, desc='Inference'):
             image = cv2.imread(str(fname), 0)  # 512x512
+            mask = remove_extra_areas(image)
             image = torch.from_numpy(image / 255).to(Params.device)  # normalize
             image = torch.unsqueeze(image, 0)  # 1x512x512
             image = torch.unsqueeze(image, 0).double()  # 1x1x512x512
             if model_1 and model_2:
-                y = ensemble_pred(image, model, model_1, model_2)
+                y = ensemble_pred(image, model, model_1, model_2, method=Params.ensemble_method)
             else:
                 y = model(image, None, None)
                 y = ((torch.sigmoid(y) > Params.threshold) * 255).type(torch.uint8)
+                # y = y * mask
                 # y = (torch.sigmoid(y) * 255).type(torch.uint8)
             y = y[0, 0, ...]
             y = np.array(y.cpu())
+            y = (y * mask).astype(np.uint8)
+            y = filter_pred_by_area_np(y)
             plt.imsave(pred_save_dir / f'{fname.name}', y, cmap='gray')
             # vis purpose only
             image = (image * 255).type(torch.uint8)
@@ -108,4 +159,4 @@ if __name__ == '__main__':
             plt.imsave(vis_dir / f'{fname.name}', xy, cmap='gray')
     Params.csv_path.mkdir(exist_ok=True, parents=True)
     save_path = Params.csv_path / f'{Params.csv_name}_{save_time}.csv'
-    # generate_csv(submission_pred_dir=pred_save_dir, save_path=save_path)
+    generate_csv(submission_pred_dir=pred_save_dir, save_path=save_path)

@@ -218,11 +218,11 @@ if __name__ == '__main__':
 
     # in_root = Path('data/pathology/subset')
     in_root = Path('/home/markin/Markin/prj/innopolis/data/brains/brains')
-    out_root = Path('/home/markin/Markin/prj/innopolis/data/pathology/pseudo_3')
+    out_root = Path('/home/markin/Markin/prj/innopolis/data/pathology/pseudo_4')
     fnames, feats, kmeans = clusterize(in_root=in_root)
-    top_closest_0_inds, top_closest_1_inds = choose_closest_to_center(feats=feats, kmeans=kmeans, top_k=100)
+    top_closest_0_inds, top_closest_1_inds = choose_closest_to_center(feats=feats, kmeans=kmeans, top_k=1000)
     compare_closest_sample(in_root=in_root, out_root=out_root, fnames=fnames, top_closest_0_inds=top_closest_0_inds,
-                           top_closest_1_inds=top_closest_1_inds, iou_threshold=.80, thresh_low=30, thresh_high=80,
+                           top_closest_1_inds=top_closest_1_inds, iou_threshold=.75, thresh_low=30, thresh_high=70,
                            struct_1=3, struct_2=11, min_area=800)
 
 
@@ -239,4 +239,9 @@ if __name__ == '__main__':
 
     # compare_closest_sample(in_root=in_root, out_root=out_root, fnames=fnames, top_closest_0_inds=top_closest_0_inds,
     #                        top_closest_1_inds=top_closest_1_inds, iou_threshold=.80, thresh_low=30, thresh_high=70,
+    #                        struct_1=3, struct_2=11, min_area=800)
+
+    # pseudo_3
+    # compare_closest_sample(in_root=in_root, out_root=out_root, fnames=fnames, top_closest_0_inds=top_closest_0_inds,
+    #                        top_closest_1_inds=top_closest_1_inds, iou_threshold=.80, thresh_low=30, thresh_high=80,
     #                        struct_1=3, struct_2=11, min_area=800)
