@@ -3,6 +3,8 @@ Solution to Innopolis Global AI Challenge 2023: AI4MED.
 This code includes both stages (unsupervised and supervised + self-supervised) and submission generation.
 The entire architecture is illustrated below. Some minor steps were skipped.
 
+![Arch](architecture.png)
+
 # How to train the network
 First, we have to generate pseudo masks in an unsepervised fashion. 
 Original images are located in the **data/competition/competition** directory. 
