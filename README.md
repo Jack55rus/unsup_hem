@@ -41,4 +41,4 @@ You need 2 files: submission_config.py and submission_generation.py. To run the 
 - submission_vis_dir: optional, path to save orig image and its prediction
 - csv_path: optional, path to save the csv
 
-- Once everything is specified, run submission_generation.py.
+Once everything is specified, run submission_generation.py.
