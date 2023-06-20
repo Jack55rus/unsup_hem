@@ -5,6 +5,18 @@ The entire architecture is illustrated below. Some minor steps were skipped.
 
 ![Arch](architecture.png)
 
+# Inference
+[Download Weights](https://drive.google.com/file/d/1Fm7ZkfMOrBYLV3CMsZLMo2ehM4GQINCg/view?usp=drive_link)
+
+You need 2 files: submission_config.py and submission_generation.py. To run the script, specify the following parameters:
+- checkpoint_path: weights location
+- submission_img_dir: submission images directory 
+- submission_pred_dir: optional, path to save binary predictions
+- submission_vis_dir: optional, path to save orig image and its prediction
+- csv_path: optional, path to save the csv
+
+Once everything is specified, run submission_generation.py.
+
 # How to train the network
 First, we have to generate pseudo masks in an unsepervised fashion. 
 Original images are located in the **data/competition/competition** directory. 
@@ -32,13 +44,3 @@ Look at the picture to see the details. The ssl part is used to reduce distance 
 augs applied to it.
 
 Usually, 1,000-2,000 iterations are enough to train the entire network, given the default parameters.
-
-# Inference
-You need 2 files: submission_config.py and submission_generation.py. To run the script, specify the following parameters:
-- checkpoint_path: weights location
-- submission_img_dir: submission images directory 
-- submission_pred_dir: optional, path to save binary predictions
-- submission_vis_dir: optional, path to save orig image and its prediction
-- csv_path: optional, path to save the csv
-
-Once everything is specified, run submission_generation.py.
