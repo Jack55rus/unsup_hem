@@ -1,20 +1,14 @@
 import random
 
 from config import Params
-from utils import train_iter, val_iter, UNet, Augs, SSLDataset
+from utils import train_iter, UNet, Augs, SSLDataset
 import torch
 import numpy as np
-from pathlib import Path
-from torch.utils.data import Dataset, DataLoader
-from typing import List, Tuple, Optional
-import cv2
-import albumentations as A
-import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
-from datetime import datetime
 
 np.random.seed(Params.seed)
 torch.manual_seed(Params.seed)
@@ -44,7 +38,7 @@ if __name__ == '__main__':
                                loss_sup=segm_loss, loss_unsup=ce_loss, device=Params.device,
                                print_interval=Params.loss_print_interval, img_save_dir=Params.pred_save_dir,
                                weights_save_dir=Params.ckpt_save_path, train_params=train_params,
-                               log_dir=Params.log_dir)
+                               log_dir=Params.log_dir, save_interval=Params.ckpt_save_interval)
         lr_scheduler.step(loss_dict['total_loss'], epoch=epoch)
         print(f'Segm loss: {loss_dict["segm_loss"]}, SSL loss: {loss_dict["ssl_loss"]}, '
               f'total: {loss_dict["total_loss"]}')
