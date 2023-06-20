@@ -13,17 +13,17 @@ class Params:
     scheduler_factor = 0.2
     ce_margin = 0.2
     unsup_emb = 32
-    auto_mask_dir = DATA_PATH / 'pseudo' # Path('/home/markin/Markin/prj/innopolis/data/pathology/pseudo_2')
-    img_root_dir = DATA_PATH / 'slices' # Path('/home/markin/Markin/prj/innopolis/data/slices')
+    auto_mask_dir = DATA_PATH / 'pseudo'
+    img_root_dir = DATA_PATH / 'slices'
     device = 'cuda'
-    ckpt_save_path = DATA_PATH / f'all_ckpts/{name}' #  Path(f'/home/markin/Markin/prj/innopolis/data/all_ckpts/{name}')
+    ckpt_save_path = DATA_PATH / f'all_ckpts/{name}'
     seed = 3407
     loss_print_interval = 20
     ckpt_save_interval = 100
-    pred_save_dir = DATA_PATH / f'all_predictions/{name}' # Path(f'/home/markin/Markin/prj/innopolis/data/all_predictions/{name}')
+    pred_save_dir = DATA_PATH / f'all_predictions/{name}'
     ckpt_load_path = None
     comment = 'cleaned decision'
-    log_dir = DATA_PATH / f'plots/{name}'  # Path(f'/home/markin/Markin/prj/innopolis/data/plots/{name}')
+    log_dir = DATA_PATH / f'plots/{name}'
 
 
 

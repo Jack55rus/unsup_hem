@@ -6,9 +6,9 @@ class Params:
     submission_img_dir = DATA_PATH / 'submission_slices_2'
     submission_pred_dir = DATA_PATH / 'all_submission_preds'
     submission_vis_dir = DATA_PATH / 'all_submission_vis'
+    csv_path = DATA_PATH / 'csvs'
     unsup_emb = 32
     device = 'cuda'
-    csv_path = DATA_PATH / 'csvs'
     csv_name = ''
     num_files_to_infer = -1  # -1 for all
     threshold = 0.5

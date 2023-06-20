@@ -165,7 +165,7 @@ def compare_closest_sample(in_root: Path, out_root: Path, fnames: List[str],
 
 if __name__ == '__main__':
     # todo: change paths
-    in_root = Path('data/slices')
+    in_root = Path('data/competition/competition')
     out_root = Path('data/brains')
     out_root.mkdir(exist_ok=True, parents=True)
     generate_brains(in_root=in_root, out_root=out_root)
