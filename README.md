@@ -8,7 +8,7 @@ The entire architecture is illustrated below. Some minor steps were skipped.
 # How to train the network
 First, we have to generate pseudo masks in an unsepervised fashion. 
 Original images are located in the **data/competition/competition** directory. 
-Run file explore.py, it will the following:
+Run explore.py, it will do the following:
 1) extract brain from the original images (generate_brains), where it's possible, based on the assumption that brain is the largest contour
 in an image. The result will be saved into **data/brains** directory.
 2) create a feature vector for the brain images. The vector consists of a concatenation of an n-bin histogram and 95-th percentile.
@@ -23,7 +23,7 @@ After this procedure is performed k*k times, the script saves binary masks into 
 With the default configuration, 19 masks are generated. Using other parameters you can generate many more. At this point, unsupervised part is finished.
 
 Run train_loop.py
-The network consists of a supervised and self-supervised branches. There are 2 types of augmentations used in this code.
+The network consists of the supervised and self-supervised branches. There are 2 types of augmentations used in this code.
 Space-invariant augs mean that the corresponding mask is not changed after applying (e.g., collor jitter, blur, etc).
 Space-variant augs change the mask (e.g., rotation, zoom, etc). 
 For the supervised part, first, space-invariant ones are applied, then space-variant. 
@@ -40,4 +40,5 @@ You need 2 files: submission_config.py and submission_generation.py. To run the 
 - submission_pred_dir: optional, path to save binary predictions
 - submission_vis_dir: optional, path to save orig image and its prediction
 - csv_path: optional, path to save the csv
-Once everything was specified, run submission_generation.py.
+
+- Once everything is specified, run submission_generation.py.
